@@ -110,4 +110,51 @@ filterButtons.forEach((button) => {
     });
   });
 });
+async function loadAutomatedProjects() {
+    try {
+        // 1. Fetch the automatically generated JSON file
+        const response = await fetch('projects.json');
+        if (!response.ok) throw new Error('Could not load project streams');
+        
+        const projects = await response.json();
+        
+        // 2. Find the container grid in your HTML where cards should go
+        const projectGrid = document.querySelector('.projects-grid');
+        if (!projectGrid) return;
 
+        // Clear out any placeholder text inside the grid
+        projectGrid.innerHTML = '';
+
+        // 3. Loop through your automated repository entries and build the HTML cards
+        projects.forEach(project => {
+            const card = document.createElement('article');
+            card.className = 'card reveal';
+            
+            // Build the tech stack tags cleanly
+            const tagsHTML = project.tech_stack
+                .map(tech => `<span class="chip">${tech}</span>`)
+                .join('');
+
+            card.innerHTML = `
+                <div class="card-body">
+                    <span class="card-tag">Engineering Project</span>
+                    <h3 class="card-title">${project.title}</h3>
+                    <p class="card-desc">${project.description}</p>
+                    <div class="card-meta">
+                        ${tagsHTML}
+                    </div>
+                    <div class="card-links" style="margin-top: 15px;">
+                        <a href="${project.github_url}" target="_blank" class="btn-link">View Repository →</a>
+                    </div>
+                </div>
+            `;
+            
+            projectGrid.appendChild(card);
+        });
+    } catch (error) {
+        console.error('Error rendering automated project elements:', error);
+    }
+}
+
+// Run the function as soon as the website page loads up completely
+document.addEventListener('DOMContentLoaded', loadAutomatedProjects);
